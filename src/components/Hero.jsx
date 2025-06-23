@@ -1,46 +1,79 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { SplitText } from "gsap/all";
+import { useRef } from "react";
+import { useMediaQuery } from "react-responsive";
 
 const Hero = () => {
+  const videoRef = useRef();
 
-    useGSAP(() => {
-        const heroSplit = SplitText.create('.title', {type: "chars"});
-        const paragraphSplit = SplitText.create('.subtitle', {type: "lines"});
+  const isMobile = useMediaQuery({ maxWidth: 767 });
 
-        heroSplit.chars.forEach((char) => char.classList.add('text-gradient'));
+  useGSAP(() => {
+    const heroSplit = SplitText.create(".title", { type: "chars" });
+    const paragraphSplit = SplitText.create(".subtitle", { type: "lines" });
 
-        gsap.from(heroSplit.chars, {
-            yPercent: 50,
-            duration: 0.9,
-            ease: 'expo.out',
-            stagger: 0.06
-        })
+    heroSplit.chars.forEach((char) => char.classList.add("text-gradient"));
 
-        gsap.from(paragraphSplit.lines, {
-            yPercent: 50,
-            opacity: 0,
-            duration: 0.9,
-            ease: 'expo.out',
-            stagger: 0.06,
-            delay: 1
-        })
+    gsap.from(heroSplit.chars, {
+      yPercent: 50,
+      duration: 0.9,
+      ease: "expo.out",
+      stagger: 0.06,
+    });
 
-        gsap.timeline({
-            scrollTrigger: {
-                trigger: '#hero',
-                start: 'top top',
-                end: 'bottom top',
-                scrub: true
-            }
-        })
-        .to('.left-leaf', {
-            y: -300,
-        }, 0)
-        .to('.right-leaf', {
-            y: 300
-        }, 0)
-    }, [])
+    gsap.from(paragraphSplit.lines, {
+      yPercent: 50,
+      opacity: 0,
+      duration: 0.9,
+      ease: "expo.out",
+      stagger: 0.06,
+      delay: 1,
+    });
+
+    gsap
+      .timeline({
+        scrollTrigger: {
+          trigger: "#hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      })
+      .to(
+        ".left-leaf",
+        {
+          y: -300,
+        },
+        0
+      )
+      .to(
+        ".right-leaf",
+        {
+          y: 300,
+        },
+        0
+      );
+
+    const startValue = isMobile ? "top 50%" : "center 60%";
+    const endValue = isMobile ? "120% top" : "bottom top";
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "video",
+        start: startValue,
+        end: endValue,
+        scrub: true,
+        pin: true,
+      },
+    });
+
+    videoRef.current.onloadedmetadata = () => {
+      tl.to(videoRef.current, {
+        currentTime: videoRef.current.duration,
+      });
+    };
+  }, []);
 
   return (
     <>
@@ -78,6 +111,15 @@ const Hero = () => {
           </div>
         </div>
       </section>
+      <div className="video absolute inset-0">
+        <video
+          ref={videoRef}
+          src="/videos/output.mp4"
+          muted
+          playsInline
+          preload="auto"
+        />
+      </div>
     </>
   );
 };
